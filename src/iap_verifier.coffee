@@ -136,11 +136,8 @@ class IAPVerifier
   verify: (data, options, cb) ->
     if @debug then console.log("verify!")
 
-    post_data = JSON.stringify(data)
-
     options.headers = {
       'Content-Type': 'application/x-www-form-urlencoded',
-      'Content-Length': post_data.length
     }
 
     if @stubUrl
@@ -148,8 +145,13 @@ class IAPVerifier
       parts = url.parse(@stubUrl)
       options.port = parts.port
       options.host = parts.hostname
+      options.headers['Content-Type'] = 'application/json'
+      data = Object.assign(data, @stubBody)
     else
       client = https
+
+    post_data = JSON.stringify(data)
+    options.headers['Content-Length'] = post_data.length
 
     request = client.request options, (response) =>
       if @debug then console.log("statusCode: #{response.statusCode}")
